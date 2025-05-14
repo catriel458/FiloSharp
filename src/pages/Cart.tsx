@@ -1,11 +1,13 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
+import { useAuth } from '../hooks/useAuth';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 
 const Cart: React.FC = () => {
   const { items, updateQuantity, removeItem, totalItems, totalPrice } = useContext(CartContext);
+  const { isAuthenticated } = useAuth();
   
   if (items.length === 0) {
     return (
@@ -86,6 +88,7 @@ const Cart: React.FC = () => {
                               type="button"
                               onClick={() => updateQuantity(item.id, item.quantity - 1)}
                               className="text-gray-500 focus:outline-none focus:text-accent"
+                              aria-label="Decrementar cantidad"
                             >
                               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -96,6 +99,7 @@ const Cart: React.FC = () => {
                               type="button"
                               onClick={() => updateQuantity(item.id, item.quantity + 1)}
                               className="text-gray-500 focus:outline-none focus:text-accent"
+                              aria-label="Incrementar cantidad"
                             >
                               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12M6 12h12" />
@@ -141,12 +145,27 @@ const Cart: React.FC = () => {
                   </div>
                 </div>
                 
-                <Link
-                  to="/checkout"
-                  className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-3 px-4 rounded transition-colors block text-center"
-                >
-                  Proceder al Pago
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    to="/checkout"
+                    className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-3 px-4 rounded transition-colors block text-center"
+                  >
+                    Proceder al Pago
+                  </Link>
+                ) : (
+                  <div>
+                    <Link
+                      to="/login"
+                      state={{ from: '/checkout' }}
+                      className="w-full bg-accent hover:bg-accent/90 text-white font-bold py-3 px-4 rounded transition-colors block text-center"
+                    >
+                      Iniciar Sesión para Continuar
+                    </Link>
+                    <p className="text-sm text-gray-500 mt-2 text-center">
+                      Debes iniciar sesión para completar tu compra
+                    </p>
+                  </div>
+                )}
                 
                 <Link
                   to="/shop"

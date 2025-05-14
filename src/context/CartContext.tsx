@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 
+// Interfaz para un item del carrito
 interface CartItem {
   id: number;
   title: string;
@@ -8,6 +9,7 @@ interface CartItem {
   quantity: number;
 }
 
+// Interfaz para el contexto del carrito
 interface CartContextType {
   items: CartItem[];
   addItem: (item: Omit<CartItem, 'quantity'>) => void;
@@ -18,6 +20,7 @@ interface CartContextType {
   totalPrice: number;
 }
 
+// Crear el contexto con valores por defecto
 export const CartContext = createContext<CartContextType>({
   items: [],
   addItem: () => {},
@@ -34,7 +37,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [totalPrice, setTotalPrice] = useState(0);
   
   useEffect(() => {
-    // Cargar carrito desde localStorage
+    // Cargar carrito desde localStorage al inicializar
     const storedCart = localStorage.getItem('cart');
     if (storedCart) {
       setItems(JSON.parse(storedCart));
@@ -58,11 +61,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existingItem = prevItems.find(i => i.id === item.id);
       
       if (existingItem) {
-        return prevItems.map(i => 
+        // Si el item ya existe, incrementar cantidad
+        return prevItems.map(i =>
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
       
+      // Si es un nuevo item, agregarlo con cantidad 1
       return [...prevItems, { ...item, quantity: 1 }];
     });
   };
@@ -73,8 +78,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    setItems(prevItems => 
-      prevItems.map(item => 
+    setItems(prevItems =>
+      prevItems.map(item =>
         item.id === id ? { ...item, quantity } : item
       )
     );
@@ -89,7 +94,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   
   return (
-    <CartContext.Provider value={{ items, addItem, updateQuantity, removeItem, clearCart, totalItems, totalPrice }}>
+    <CartContext.Provider value={{ 
+      items, 
+      addItem, 
+      updateQuantity, 
+      removeItem, 
+      clearCart, 
+      totalItems, 
+      totalPrice 
+    }}>
       {children}
     </CartContext.Provider>
   );

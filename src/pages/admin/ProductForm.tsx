@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -113,7 +112,7 @@ const ProductForm: React.FC = () => {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow py-12">
-          <div className="container-custom">
+          <div className="container mx-auto px-4">
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-accent"></div>
             </div>
@@ -129,7 +128,7 @@ const ProductForm: React.FC = () => {
       <Header />
       
       <main className="flex-grow py-12">
-        <div className="container-custom">
+        <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-8">
             {id ? 'Editar Producto' : 'Crear Nuevo Producto'}
           </h1>

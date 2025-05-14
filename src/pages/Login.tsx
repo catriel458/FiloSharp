@@ -9,17 +9,17 @@ const Login: React.FC = () => {
     email: '',
     password: '',
   });
-  
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Obtener la URL de redirección desde el estado o usar la ruta por defecto
   const from = location.state?.from?.pathname || '/';
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prevData => ({
@@ -27,16 +27,17 @@ const Login: React.FC = () => {
       [name]: value,
     }));
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
+      // Intenta iniciar sesión con las credenciales proporcionadas
       await login(formData.email, formData.password);
-      
+
       // Redireccionar a la página anterior o a la página de inicio
       navigate(from, { replace: true });
     } catch (error) {
@@ -44,17 +45,17 @@ const Login: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      
+
       <main className="flex-grow py-12">
         <div className="container-custom max-w-md mx-auto">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6">
               <h1 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h1>
-              
+
               {error && (
                 <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
                   <div className="flex">
@@ -71,14 +72,14 @@ const Login: React.FC = () => {
                   </div>
                 </div>
               )}
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Correo Electrónico
+                    Usuario o Correo Electrónico
                   </label>
                   <input
-                    type="email"
+                    type="text"
                     id="email"
                     name="email"
                     value={formData.email}
@@ -87,7 +88,7 @@ const Login: React.FC = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                     Contraseña
@@ -102,7 +103,7 @@ const Login: React.FC = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <button
                     type="submit"
@@ -123,7 +124,7 @@ const Login: React.FC = () => {
                   </button>
                 </div>
               </form>
-              
+
               <div className="mt-6 text-center">
                 <p className="text-gray-600">
                   ¿No tienes una cuenta?{' '}
@@ -132,11 +133,20 @@ const Login: React.FC = () => {
                   </Link>
                 </p>
               </div>
+              
+              {/* Añadido para mostrar las credenciales de administrador */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-md">
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">Para acceder como administrador:</h3>
+                <div className="text-sm text-gray-600">
+                  <p>Usuario: <span className="font-medium">admin</span></p>
+                  <p>Contraseña: <span className="font-medium">admin</span></p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

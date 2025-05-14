@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// Importamos directamente el JSON
-import productsData from '../../data/products.json';
+import api from '../../services/api';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import Sidebar from './Sidebar';
@@ -20,26 +19,26 @@ interface Product {
 }
 
 const AdminProducts: React.FC = () => {
-  // Especifica el tipo de estado como array de Product
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  // Especifica el tipo de productToDelete como Product o null
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   
   useEffect(() => {
-    // En lugar de llamar a la API, usamos los datos del JSON directamente
-    // Simulamos un pequeño retraso para mostrar el loader
-    const timer = setTimeout(() => {
-      setProducts(productsData.products);
-      setLoading(false);
-    }, 500);
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/products');
+        setProducts(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error al obtener productos:', error);
+        setLoading(false);
+      }
+    };
     
-    // Limpiamos el timer si el componente se desmonta
-    return () => clearTimeout(timer);
+    fetchProducts();
   }, []);
   
-  // Añade tipado al parámetro product
   const handleDeleteClick = (product: Product) => {
     setProductToDelete(product);
     setShowDeleteModal(true);
@@ -49,8 +48,8 @@ const AdminProducts: React.FC = () => {
     if (!productToDelete) return;
     
     try {
-      // Simulamos la eliminación del producto (sin llamar a la API)
-      // Solo actualizamos el estado local
+      // En un escenario real, harías una llamada a DELETE a la API
+      // Como estamos simulando, simplemente actualizamos el estado local
       setProducts(products.filter(p => p.id !== productToDelete.id));
       
       setShowDeleteModal(false);
@@ -65,7 +64,7 @@ const AdminProducts: React.FC = () => {
       <Header />
       
       <main className="flex-grow py-12">
-        <div className="container-custom">
+        <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-8">Gestión de Productos</h1>
           
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

@@ -5,13 +5,52 @@ import { CartContext } from '../../context/CartContext';
 
 const Header: React.FC = () => {
   const { isAuthenticated, isAdmin, user, logout } = useContext(AuthContext);
-  const { totalItems } = useContext(CartContext);
+  const { items, totalItems, totalPrice, removeItem } = useContext(CartContext);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Debugging
+  console.log('Header - Auth State:', { isAuthenticated, isAdmin, user });
   
   const handleLogout = () => {
     logout();
     navigate('/');
+    setMobileMenuOpen(false);
+    setProfileMenuOpen(false);
+  };
+  
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+    if (profileMenuOpen) setProfileMenuOpen(false);
+    if (cartMenuOpen) setCartMenuOpen(false);
+  };
+  
+  const toggleProfileMenu = () => {
+    setProfileMenuOpen(!profileMenuOpen);
+    if (cartMenuOpen) setCartMenuOpen(false);
+    if (mobileMenuOpen && window.innerWidth < 768) setMobileMenuOpen(false);
+  };
+
+  // Función para abrir o cerrar manualmente el menú del carrito
+  const toggleCartMenu = () => {
+    setCartMenuOpen(!cartMenuOpen);
+    if (profileMenuOpen) setProfileMenuOpen(false);
+    if (mobileMenuOpen && window.innerWidth < 768) setMobileMenuOpen(false);
+  };
+  
+  // Manejador para ir al panel de admin
+  const handleAdminPanel = (e) => {
+    e.preventDefault();
+    
+    // Verificar permisos
+    if (isAuthenticated && isAdmin) {
+      navigate('/admin/dashboard');
+    } else {
+      console.log('No tiene permisos para acceder al panel de admin');
+      navigate('/login');
+    }
   };
   
   return (
@@ -31,70 +70,203 @@ const Header: React.FC = () => {
             <Link to="/knife-types" className="hover:text-accent transition-colors">Tipos de Cuchillos</Link>
             <Link to="/about" className="hover:text-accent transition-colors">Nosotros</Link>
             <Link to="/contact" className="hover:text-accent transition-colors">Contacto</Link>
+            {isAuthenticated && isAdmin && (
+              <button 
+                onClick={handleAdminPanel}
+                className="hover:text-accent transition-colors font-medium"
+              >
+                Panel Admin
+              </button>
+            )}
           </nav>
           
           {/* Acciones */}
           <div className="flex items-center space-x-4">
             {/* Carrito */}
-            <Link to="/cart" className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-accent text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                  {totalItems}
-                </span>
+            <div className="relative">
+              <button
+                onClick={toggleCartMenu}
+                className="relative hover:text-accent transition-colors flex items-center"
+                aria-expanded={cartMenuOpen}
+                aria-haspopup="true"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-accent text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+              
+              {/* Vista previa del carrito - Ya no se cierra automáticamente */}
+              {cartMenuOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white text-primary rounded shadow-lg z-20">
+                  <div className="py-3 px-4 border-b border-gray-100">
+                    <p className="font-medium">Tu Carrito ({totalItems})</p>
+                  </div>
+
+                  {items.length === 0 ? (
+                    <div className="py-6 px-4 text-center">
+                      <p className="text-gray-500 text-sm">Tu carrito está vacío</p>
+                      <Link 
+                        to="/shop" 
+                        className="mt-4 block text-accent hover:underline text-sm font-medium"
+                        onClick={() => setCartMenuOpen(false)}
+                      >
+                        Ir a la tienda
+                      </Link>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="max-h-64 overflow-y-auto divide-y divide-gray-100">
+                        {items.map(item => (
+                          <div key={item.id} className="py-3 px-4 flex items-start">
+                            <div className="h-16 w-16 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+                              <img 
+                                src={item.image} 
+                                alt={item.title}
+                                className="h-full w-full object-cover" 
+                              />
+                            </div>
+                            <div className="ml-3 flex-1">
+                              <div className="flex justify-between">
+                                <Link 
+                                  to={`/product/${item.id}`}
+                                  className="text-sm font-medium text-gray-900 hover:text-accent truncate"
+                                  onClick={() => setCartMenuOpen(false)}
+                                >
+                                  {item.title}
+                                </Link>
+                                <button
+                                  onClick={() => removeItem(item.id)}
+                                  className="text-xs text-red-500 hover:text-red-700 ml-2"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </div>
+                              <div className="flex justify-between items-center mt-1">
+                                <p className="text-xs text-gray-500">{item.quantity} x ${item.price.toLocaleString()}</p>
+                                <p className="text-xs font-medium">${(item.quantity * item.price).toLocaleString()}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      <div className="p-4 border-t border-gray-100">
+                        <div className="flex justify-between font-medium text-sm mb-2">
+                          <span>Total:</span>
+                          <span>${totalPrice.toLocaleString()}</span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2">
+                          <Link
+                            to="/cart"
+                            className="bg-gray-800 hover:bg-gray-900 text-white text-center py-2 px-4 rounded text-sm font-medium"
+                            onClick={() => setCartMenuOpen(false)}
+                          >
+                            Ver Carrito
+                          </Link>
+                          <Link
+                            to="/checkout"
+                            className="bg-accent hover:bg-accent/90 text-white text-center py-2 px-4 rounded text-sm font-medium"
+                            onClick={() => setCartMenuOpen(false)}
+                          >
+                            Checkout
+                          </Link>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
-            </Link>
+            </div>
             
             {/* Usuario */}
             {isAuthenticated ? (
               <div className="relative">
                 <button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  onClick={toggleProfileMenu}
                   className="flex items-center space-x-1"
+                  aria-expanded={profileMenuOpen}
+                  aria-haspopup="true"
                 >
                   <span>{user?.username}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transition-transform duration-200 ${profileMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 
-                {mobileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-primary rounded shadow-lg z-10">
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white text-primary rounded shadow-lg z-20">
                     <div className="py-1">
+                      {/* Info del usuario */}
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium">{user?.username}</p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
+                      </div>
+                      
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-4 py-2 hover:bg-gray-100 text-sm"
+                        onClick={() => setProfileMenuOpen(false)}
                       >
                         Mi Perfil
                       </Link>
                       
                       <Link
                         to="/orders"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-4 py-2 hover:bg-gray-100 text-sm"
+                        onClick={() => setProfileMenuOpen(false)}
                       >
                         Mis Pedidos
                       </Link>
                       
                       {isAdmin && (
-                        <Link
-                          to="/admin"
-                          className="block px-4 py-2 hover:bg-gray-100"
-                          onClick={() => setMobileMenuOpen(false)}
-                        >
-                          Panel Admin
-                        </Link>
+                        <>
+                          <div className="border-t border-gray-100 my-1"></div>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setProfileMenuOpen(false);
+                              navigate('/admin/dashboard');
+                            }}
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm font-medium text-accent"
+                          >
+                            Panel Admin
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setProfileMenuOpen(false);
+                              navigate('/admin/products');
+                            }}
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          >
+                            Gestionar Productos
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setProfileMenuOpen(false);
+                              navigate('/admin/orders');
+                            }}
+                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          >
+                            Gestionar Pedidos
+                          </button>
+                        </>
                       )}
                       
+                      <div className="border-t border-gray-100 my-1"></div>
+                      
                       <button
-                        onClick={() => {
-                          handleLogout();
-                          setMobileMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
                       >
                         Cerrar Sesión
                       </button>
@@ -103,7 +275,7 @@ const Header: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="hidden md:flex items-center space-x-2">
                 <Link to="/login" className="hover:text-accent transition-colors">
                   Iniciar Sesión
                 </Link>
@@ -117,7 +289,9 @@ const Header: React.FC = () => {
             {/* Menú móvil */}
             <button
               className="md:hidden focus:outline-none"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={toggleMobileMenu}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -128,7 +302,7 @@ const Header: React.FC = () => {
         
         {/* Menú móvil */}
         {mobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4">
+          <div id="mobile-menu" className="md:hidden mt-4 pb-4">
             <nav className="flex flex-col space-y-3">
               <Link to="/" className="hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 Inicio
@@ -145,6 +319,47 @@ const Header: React.FC = () => {
               <Link to="/contact" className="hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 Contacto
               </Link>
+              
+              {isAdmin && (
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    navigate('/admin/dashboard');
+                  }}
+                  className="text-left text-accent font-medium hover:text-accent/80 transition-colors"
+                >
+                  Panel Admin
+                </button>
+              )}
+              
+              {!isAuthenticated && (
+                <div className="pt-2 border-t border-gray-700">
+                  <Link to="/login" className="block py-2 hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                    Iniciar Sesión
+                  </Link>
+                  <Link to="/register" className="block py-2 hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                    Registrarse
+                  </Link>
+                </div>
+              )}
+              
+              {isAuthenticated && (
+                <div className="pt-2 border-t border-gray-700">
+                  <Link to="/profile" className="block py-2 hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                    Mi Perfil
+                  </Link>
+                  <Link to="/orders" className="block py-2 hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                    Mis Pedidos
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block py-2 text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    Cerrar Sesión
+                  </button>
+                </div>
+              )}
             </nav>
           </div>
         )}

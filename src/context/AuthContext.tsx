@@ -1,16 +1,15 @@
 import React, { createContext, useState, useEffect } from 'react';
-
-// Asegúrate de tener este archivo creado
 import api from '../services/api.ts';
 
-// Actualizada la interfaz User para incluir email
+// Interfaz para el usuario
 interface User {
   id: number;
   username: string;
-  email: string; // Añadida la propiedad email
+  email: string;
   role: string;
 }
 
+// Interfaz para el contexto de autenticación
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -21,6 +20,7 @@ interface AuthContextType {
   logout: () => void;
 }
 
+// Crear el contexto con valores por defecto
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
@@ -48,71 +48,85 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(parsedUser);
       setIsAuthenticated(true);
       setIsAdmin(parsedUser.role === 'admin');
-      
-      // Establecer token para llamadas API
-      if (api.defaults.headers) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-      }
     }
   }, []);
   
   const login = async (email: string, password: string) => {
     try {
-      const response = await api.post('/api/login', { email, password });
-      const { token, user } = response.data;
-      
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      
-      setToken(token);
-      setUser(user);
-      setIsAuthenticated(true);
-      setIsAdmin(user.role === 'admin');
-      
-      // Establecer token para llamadas API
-      if (api.defaults.headers) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // Simulamos la autenticación con credenciales hardcodeadas
+      if (email === 'admin' && password === 'admin') {
+        // Usuario administrador hardcodeado
+        const mockUser = {
+          id: 1,
+          username: 'admin',
+          email: 'admin@example.com',
+          role: 'admin'
+        };
+        
+        // Token simulado
+        const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(2);
+        
+        // Guardar en localStorage
+        localStorage.setItem('token', mockToken);
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        
+        // Actualizar estado
+        setToken(mockToken);
+        setUser(mockUser);
+        setIsAuthenticated(true);
+        setIsAdmin(true);
+        
+        return;
       }
+      
+      // Si llega aquí, las credenciales son incorrectas
+      throw new Error('Credenciales incorrectas');
     } catch (error) {
+      console.error('Error de inicio de sesión:', error);
       throw error;
     }
   };
   
   const register = async (username: string, email: string, password: string) => {
     try {
-      const response = await api.post('/api/register', { username, email, password });
-      const { token, user } = response.data;
+      // En un entorno real, esto enviaría los datos al servidor
+      // Aquí creamos un usuario simulado
+      const mockUser = {
+        id: new Date().getTime(), // ID único basado en timestamp
+        username,
+        email,
+        role: 'user' // Por defecto, los nuevos usuarios son regulares, no admin
+      };
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // Token simulado
+      const mockToken = 'mock-jwt-token-' + Math.random().toString(36).substring(2);
       
-      setToken(token);
-      setUser(user);
+      // Guardar en localStorage
+      localStorage.setItem('token', mockToken);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      // Actualizar estado
+      setToken(mockToken);
+      setUser(mockUser);
       setIsAuthenticated(true);
-      setIsAdmin(user.role === 'admin');
+      setIsAdmin(false); // No es admin
       
-      // Establecer token para llamadas API
-      if (api.defaults.headers) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
     } catch (error) {
+      console.error('Error de registro:', error);
       throw error;
     }
   };
   
   const logout = () => {
+    // Eliminar datos de sesión
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     
+    // Actualizar estado
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
-    
-    // Eliminar token de las llamadas API
-    if (api.defaults.headers) {
-      delete api.defaults.headers.common['Authorization'];
-    }
   };
   
   return (

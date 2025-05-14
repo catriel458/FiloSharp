@@ -3,8 +3,9 @@ import api from '../../services/api';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import Sidebar from './Sidebar';
+import { useAuth } from '../../hooks/useAuth';
 
-// Añade estas interfaces aquí, justo después de las importaciones
+// Definimos las interfaces necesarias
 interface Product {
   id: number;
   title: string;
@@ -37,6 +38,7 @@ interface OrderItem {
 }
 
 const AdminDashboard: React.FC = () => {
+  const { user, isAdmin } = useAuth();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -46,28 +48,56 @@ const AdminDashboard: React.FC = () => {
   });
   
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   
   useEffect(() => {
+    // Para depuración
+    console.log('AdminDashboard - Usuario:', user);
+    console.log('AdminDashboard - Es Admin:', isAdmin);
+    
     const fetchStats = async () => {
       try {
-        // En un escenario real, tendrías un endpoint para estas estadísticas
-        // Aquí simulamos los datos obteniendo información de diferentes endpoints
-        const [productsRes, ordersRes] = await Promise.all([
-          api.get('/products'),
-          api.get('/orders'),
-        ]);
-        
+        // Simulamos obtener productos
+        const productsRes = await api.get('/products');
         const products: Product[] = productsRes.data;
-        const orders: Order[] = ordersRes.data;
+        setProducts(products);
         
-        const pendingOrders = orders.filter((order: Order) => order.status === 'pendiente');
-        const revenue = orders.reduce((sum: number, order: Order) => sum + order.total_amount, 0);
+        // Simulamos ordenes de ejemplo (en un escenario real vendrían de la API)
+        const mockOrders: Order[] = [
+          {
+            id: 1001,
+            user_id: 1,
+            total_amount: 120,
+            status: 'pendiente',
+            created_at: '2025-05-01T10:00:00.000Z',
+          },
+          {
+            id: 1002,
+            user_id: 2,
+            total_amount: 240,
+            status: 'completado',
+            created_at: '2025-04-30T15:30:00.000Z',
+          },
+          {
+            id: 1003,
+            user_id: 3,
+            total_amount: 180,
+            status: 'procesando',
+            created_at: '2025-05-02T09:15:00.000Z',
+          }
+        ];
+        
+        setOrders(mockOrders);
+        
+        const pendingOrders = mockOrders.filter(order => order.status === 'pendiente');
+        const revenue = mockOrders.reduce((sum, order) => sum + order.total_amount, 0);
         
         setStats({
           totalProducts: products.length,
-          totalOrders: orders.length,
+          totalOrders: mockOrders.length,
           pendingOrders: pendingOrders.length,
-          totalUsers: 10, // Valor ficticio, normalmente vendría de un endpoint
+          totalUsers: 10, // Valor ficticio
           revenue,
         });
         
@@ -79,14 +109,21 @@ const AdminDashboard: React.FC = () => {
     };
     
     fetchStats();
-  }, []);
+  }, [user, isAdmin]);
+  
+  // Calculamos los productos más vendidos (simulado)
+  const topProducts = products.slice(0, 2).map((product, index) => ({
+    ...product,
+    sales: index === 0 ? 24 : 18,
+    revenue: index === 0 ? 2880 : 2700
+  }));
   
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       
       <main className="flex-grow py-12">
-        <div className="container-custom">
+        <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
           
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -193,53 +230,45 @@ const AdminDashboard: React.FC = () => {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {/* En un escenario real, mapearías orders aquí */}
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              #1001
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              Juan Pérez
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              01/05/2025
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                pendiente
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              $120.00
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <a href="#" className="text-accent hover:text-accent/90 mr-3">Ver</a>
-                              <a href="#" className="text-gray-500 hover:text-gray-700">Editar</a>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              #1002
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              María López
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              30/04/2025
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                completado
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              $240.00
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <a href="#" className="text-accent hover:text-accent/90 mr-3">Ver</a>
-                              <a href="#" className="text-gray-500 hover:text-gray-700">Editar</a>
-                            </td>
-                          </tr>
+                          {orders.map(order => {
+                            // Simulamos la información del cliente
+                            const customerNames = ['Juan Pérez', 'María López', 'Carlos Rodríguez'];
+                            const customerIndex = (order.user_id - 1) % customerNames.length;
+                            const customerName = customerNames[customerIndex];
+                            
+                            return (
+                              <tr key={order.id}>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                  #{order.id}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {customerName}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {new Date(order.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    order.status === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                    order.status === 'procesando' ? 'bg-blue-100 text-blue-800' :
+                                    order.status === 'enviado' ? 'bg-purple-100 text-purple-800' :
+                                    order.status === 'completado' ? 'bg-green-100 text-green-800' :
+                                    order.status === 'cancelado' ? 'bg-red-100 text-red-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {order.status}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  ${order.total_amount.toLocaleString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                  <a href="#" className="text-accent hover:text-accent/90 mr-3">Ver</a>
+                                  <a href="#" className="text-gray-500 hover:text-gray-700">Editar</a>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -276,61 +305,35 @@ const AdminDashboard: React.FC = () => {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {/* En un escenario real, mapearías top products aquí */}
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="h-10 w-10 flex-shrink-0">
-                                  <img
-                                    src="/images/products/product-1.jpg"
-                                    alt="Cuchillo Chef"
-                                    className="h-10 w-10 rounded object-cover"
-                                  />
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    Cuchillo Chef
+                          {topProducts.map(product => (
+                            <tr key={product.id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="h-10 w-10 flex-shrink-0">
+                                    <img
+                                      src={product.image1}
+                                      alt={product.title}
+                                      className="h-10 w-10 rounded object-cover"
+                                    />
+                                  </div>
+                                  <div className="ml-4">
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {product.title}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              $120.00
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              24
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              $2,880.00
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="h-10 w-10 flex-shrink-0">
-                                  <img
-                                    src="/images/products/product-2.jpg"
-                                    alt="Cuchillo Santoku"
-                                    className="h-10 w-10 rounded object-cover"
-                                  />
-                                </div>
-                                <div className="ml-4">
-                                  <div className="text-sm font-medium text-gray-900">
-                                    Cuchillo Santoku
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              $150.00
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              18
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              $2,700.00
-                            </td>
-                          </tr>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${product.price.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {product.sales}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                ${product.revenue.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
