@@ -15,10 +15,10 @@ TailwindCSS
 🚀 ¡Comienza a explorar!
 Sigue estos sencillos pasos para tener FiloSharp funcionando en tu entorno de desarrollo:
 bash# Clona este repositorio
-git clone https://github.com/catriel458/filoSharp.git
+git clone https://github.com/catriel458/FiloSharp.git
 
 # Navega al directorio del proyecto
-cd filoSharp
+cd FiloSharp
 
 # Instala las dependencias
 npm install
