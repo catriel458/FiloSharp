@@ -7,9 +7,7 @@ FiloSharp es un e-commerce especializado en cuchillos artesanales de alta calida
 React 18
 Vite
 TailwindCSS
-React Router v6
-React Query
-Zustand
+
 
 🚀 ¡Comienza a explorar!
 Sigue estos sencillos pasos para tener FiloSharp funcionando en tu entorno de desarrollo:
