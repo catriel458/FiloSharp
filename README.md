@@ -4,8 +4,8 @@
 FiloSharp es un e-commerce especializado en cuchillos artesanales de alta calidad, donde cada pieza cuenta una historia de tradición, arte y precisión. Nuestra plataforma permite explorar nuestra exclusiva colección, apreciar cada detalle y materializar el sueño de poseer una auténtica obra maestra forjada por manos expertas.
 🛠️ Desarrollado con
 
-React 18
-Vite
+React 18,
+Vite,
 TailwindCSS
 
 
