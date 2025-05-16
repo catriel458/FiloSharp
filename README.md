@@ -3,7 +3,7 @@
 ✨ Acerca del Proyecto
 FiloSharp es un e-commerce especializado en cuchillos artesanales de alta calidad, donde cada pieza cuenta una historia de tradición, arte y precisión. Nuestra plataforma permite explorar nuestra exclusiva colección, apreciar cada detalle y materializar el sueño de poseer una auténtica obra maestra forjada por manos expertas.
 
-🛠️ Desarrollado con
+🛠️ Desarrollado con:
 
 React 18
 
@@ -15,7 +15,7 @@ TailwindCSS
 🚀 ¡Comienza a explorar!
 Sigue estos sencillos pasos para tener FiloSharp funcionando en tu entorno de desarrollo:
 bash# Clona este repositorio
-git clone https://github.com/tu-usuario/filoSharp.git
+git clone https://github.com/catriel458/filoSharp.git
 
 # Navega al directorio del proyecto
 cd filoSharp
