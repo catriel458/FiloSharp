@@ -48,7 +48,7 @@ cd FiloSharp
 # 3️⃣ Instala las dependencias
 npm install
 
-# 4️⃣ Navega al directorio del Front
+# 4️⃣ Navega al directorio del front
 cd FiloSharp
 
 # 5️⃣ ¡Lanza la magia! ✨
@@ -60,6 +60,8 @@ npm run dev
 🌐 **Abre tu navegador en** `http://localhost:5173`
 
 🚀 **Demo en vivo:** [filo-sharp-knife.vercel.app](https://filo-sharp-knife.vercel.app/shop)
+
+🔐 **Credenciales de administrador:** `admin` / `admin`
 
 </div>
 
