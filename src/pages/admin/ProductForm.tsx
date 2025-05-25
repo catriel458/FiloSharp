@@ -5,19 +5,6 @@ import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import Sidebar from './Sidebar';
 
-// Interface para el producto
-interface Product {
-  id: number;
-  title: string;
-  description: string;
-  price: number;
-  image1: string;
-  image2?: string;
-  category: string;
-  material: string;
-  type: string;
-}
-
 // Interface para los datos del formulario
 interface FormData {
   title: string;

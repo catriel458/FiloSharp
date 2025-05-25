@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../services/api.ts';
+// Removido import de api ya que no se usa actualmente
+// import api from '../services/api.ts';
 
 // Interfaz para el usuario
 interface User {
@@ -87,10 +88,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  const register = async (username: string, email: string, password: string) => {
+  const register = async (username: string, email: string, _password: string) => {
     try {
       // En un entorno real, esto enviaría los datos al servidor
       // Aquí creamos un usuario simulado
+      // Nota: _password prefijado con _ para indicar que no se usa actualmente
       const mockUser = {
         id: new Date().getTime(), // ID único basado en timestamp
         username,

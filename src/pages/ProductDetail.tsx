@@ -1,13 +1,26 @@
-import React, { useState, useEffect, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import productsData from '../data/products.json';
+import api from '../services/api';
 import { CartContext } from '../context/CartContext';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 
+// Definimos el tipo del producto
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  price: number;
+  image1: string;
+  image2?: string;
+  category: string;
+  material: string;
+  type: string;
+}
+
 const ProductDetail = () => {
-  const { id } = useParams();
-  const [product, setProduct] = useState(null);
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -17,27 +30,35 @@ const ProductDetail = () => {
   const { addItem } = useContext(CartContext);
   
   useEffect(() => {
-    setLoading(true);
-    
-    if (id && productsData && productsData.products) {
-      const numericId = parseInt(id);
-      const foundProduct = productsData.products.find(p => p.id === numericId);
+    const fetchProduct = async () => {
+      setLoading(true);
       
-      if (foundProduct) {
-        setProduct(foundProduct);
-        setActiveImage(foundProduct.image1);
-        console.log("Producto encontrado:", foundProduct);
-      } else {
-        console.log("Producto no encontrado para ID:", numericId);
+      if (id) {
+        try {
+          const numericId = parseInt(id);
+          const response = await api.getById(numericId);
+          
+          if (response.data) {
+            setProduct(response.data);
+            setActiveImage(response.data.image1);
+            console.log("Producto encontrado:", response.data);
+          } else {
+            console.log("Producto no encontrado para ID:", numericId);
+          }
+        } catch (error) {
+          console.error("Error al obtener producto:", error);
+        }
       }
-    }
-    
-    setTimeout(() => {
-      setLoading(false);
-    }, 300); // Pequeño tiempo de carga para la animación
+      
+      setTimeout(() => {
+        setLoading(false);
+      }, 300);
+    };
+
+    fetchProduct();
   }, [id]);
   
-  const handleQuantityChange = (e) => {
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuantity(parseInt(e.target.value));
   };
   
@@ -151,7 +172,7 @@ const ProductDetail = () => {
                   
                   {product.image2 && (
                     <button
-                      onClick={() => setActiveImage(product.image2)}
+                      onClick={() => setActiveImage(product.image2!)}
                       className={`aspect-square overflow-hidden rounded-lg border-2 transition-all ${
                         activeImage === product.image2 
                           ? 'border-red-600 shadow-md' 
@@ -258,34 +279,7 @@ const ProductDetail = () => {
             </div>
           </div>
           
-          {/* Sección de productos relacionados (opcional) */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">También te puede interesar</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {productsData.products
-                .filter(p => p.category === product.category && p.id !== product.id)
-                .slice(0, 4)
-                .map(relatedProduct => (
-                  <Link 
-                    key={relatedProduct.id} 
-                    to={`/product/${relatedProduct.id}`}
-                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <div className="aspect-square overflow-hidden">
-                      <img 
-                        src={relatedProduct.image1} 
-                        alt={relatedProduct.title} 
-                        className="object-cover w-full h-full transition-transform hover:scale-105" 
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-medium text-gray-900 mb-1">{relatedProduct.title}</h3>
-                      <p className="text-red-600 font-bold">${relatedProduct.price.toLocaleString()}</p>
-                    </div>
-                  </Link>
-                ))}
-            </div>
-          </div>
+          <ProductsRelated currentProduct={product} />
         </div>
       </div>
       
@@ -347,6 +341,59 @@ const ProductDetail = () => {
       )}
 
       <Footer />
+    </div>
+  );
+};
+
+// Componente separado para productos relacionados
+const ProductsRelated = ({ currentProduct }: { currentProduct: Product }) => {
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      try {
+        const response = await api.get('/products');
+        const allProducts = response.data;
+        
+        const related = allProducts
+          .filter((p: Product) => p.category === currentProduct.category && p.id !== currentProduct.id)
+          .slice(0, 4);
+        
+        setRelatedProducts(related);
+      } catch (error) {
+        console.error('Error fetching related products:', error);
+      }
+    };
+
+    fetchRelatedProducts();
+  }, [currentProduct]);
+
+  if (relatedProducts.length === 0) return null;
+
+  return (
+    <div className="mt-16">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">También te puede interesar</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {relatedProducts.map(relatedProduct => (
+          <Link 
+            key={relatedProduct.id} 
+            to={`/product/${relatedProduct.id}`}
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+          >
+            <div className="aspect-square overflow-hidden">
+              <img 
+                src={relatedProduct.image1} 
+                alt={relatedProduct.title} 
+                className="object-cover w-full h-full transition-transform hover:scale-105" 
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900 mb-1">{relatedProduct.title}</h3>
+              <p className="text-red-600 font-bold">${relatedProduct.price.toLocaleString()}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };
