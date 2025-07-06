@@ -46,7 +46,7 @@ const Header: React.FC = () => {
     
     // Verificar permisos
     if (isAuthenticated && isAdmin) {
-      navigate('/admin/dashboard');
+       navigate('/admin/products');
     } else {
       console.log('No tiene permisos para acceder al panel de admin');
       navigate('/login');
@@ -225,50 +225,14 @@ const Header: React.FC = () => {
                         Mi Perfil
                       </Link>
                       
-                      <Link
-                        to="/orders"
-                        className="block px-4 py-2 hover:bg-gray-100 text-sm"
-                        onClick={() => setProfileMenuOpen(false)}
-                      >
-                        Mis Pedidos
-                      </Link>
+                     
                       
                       {isAdmin && (
                         <>
                           <div className="border-t border-gray-100 my-1"></div>
-                          <button
-                            type="button"
-                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                              e.preventDefault();
-                              setProfileMenuOpen(false);
-                              navigate('/admin/dashboard');
-                            }}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm font-medium text-accent"
-                          >
-                            Panel Admin
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                              e.preventDefault();
-                              setProfileMenuOpen(false);
-                              navigate('/admin/products');
-                            }}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                          >
-                            Gestionar Productos
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                              e.preventDefault();
-                              setProfileMenuOpen(false);
-                              navigate('/admin/orders');
-                            }}
-                            className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-                          >
-                            Gestionar Pedidos
-                          </button>
+                      
+                          
+                  
                         </>
                       )}
                       
@@ -333,19 +297,7 @@ const Header: React.FC = () => {
                 Contacto
               </Link>
               
-              {isAdmin && (
-                <button 
-                  type="button"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.preventDefault();
-                    setMobileMenuOpen(false);
-                    navigate('/admin/dashboard');
-                  }}
-                  className="text-left text-accent font-medium hover:text-accent/80 transition-colors"
-                >
-                  Panel Admin
-                </button>
-              )}
+          
               
               {!isAuthenticated && (
                 <div className="pt-2 border-t border-gray-700">

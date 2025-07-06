@@ -24,9 +24,8 @@ import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 
 // Páginas de Administrador
-import AdminDashboard from './pages/admin/Dashboard';
+
 import AdminProducts from './pages/admin/Products';
-import AdminOrders from './pages/admin/Orders';
 import ProductForm from './pages/admin/ProductForm';
 
 // Definir tipo para las props
@@ -121,15 +120,7 @@ const App: React.FC = () => {
               }
             />
 
-            {/* Rutas de administrador */}
-            <Route
-              path="/admin"
-              element={
-                <AdminRoute>
-                  <AdminDashboard />
-                </AdminRoute>
-              }
-            />
+            
             <Route
               path="/admin/products"
               element={
@@ -154,15 +145,7 @@ const App: React.FC = () => {
                 </AdminRoute>
               }
             />
-            <Route
-              path="/admin/orders"
-              element={
-                <AdminRoute>
-                  <AdminOrders />
-                </AdminRoute>
-              }
-            />
-
+        
             {/* Ruta para páginas no encontradas */}
             <Route path="*" element={<NotFound />} />
           </Routes>

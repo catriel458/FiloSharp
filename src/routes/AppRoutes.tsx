@@ -12,7 +12,6 @@ import Checkout from '../pages/Checkout';
 import NotFound from '../pages/NotFound';
 
 // Páginas de administrador
-import AdminDashboard from '../pages/admin/Dashboard';
 import AdminProducts from '../pages/admin/Products';
 import ProductForm from '../pages/admin/ProductForm';
 import AdminOrders from '../pages/admin/Orders';
@@ -64,14 +63,7 @@ const AppRoutes: React.FC = () => {
       />
       
       {/* Rutas de administrador (protegidas, requieren rol admin) */}
-      <Route 
-        path="/admin/dashboard" 
-        element={
-          <ProtectedRoute requiredRole="admin">
-            <AdminDashboard />
-          </ProtectedRoute>
-        } 
-      />
+
       
       <Route 
         path="/admin/products" 
