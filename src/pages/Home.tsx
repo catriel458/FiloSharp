@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import productsData from '../data/products.json';
+import api from '../services/api';
 import ProductGrid from '../components/shop/ProductGrid';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -38,8 +38,8 @@ const Carousel = ({ images }: { images: string[] }) => {
         <div
           key={index}
           className={`absolute inset-0 transition-all duration-700 ease-in-out transform ${index === currentSlide
-              ? 'opacity-100 scale-100'
-              : 'opacity-0 scale-105'
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-105'
             }`}
         >
           <img
@@ -61,8 +61,8 @@ const Carousel = ({ images }: { images: string[] }) => {
             onClick={() => goToSlide(index)}
             aria-label={`Ir a la imagen ${index + 1}`}
             className={`transition-all duration-300 ${index === currentSlide
-                ? 'w-12 h-3 bg-accent rounded-full'
-                : 'w-3 h-3 bg-white/60 rounded-full hover:bg-white/80'
+              ? 'w-12 h-3 bg-accent rounded-full'
+              : 'w-3 h-3 bg-white/60 rounded-full hover:bg-white/80'
               }`}
           />
         ))}
@@ -106,24 +106,27 @@ const Home: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Cargar productos destacados del JSON
+  // REEMPLAZAR con:
   useEffect(() => {
-    // Simulamos la carga asíncrona para mantener la experiencia
-    const timer = setTimeout(() => {
-      // Obtenemos todos los productos del JSON
-      const allProducts = productsData.products;
-      
-      // Seleccionamos 6 productos aleatorios como destacados
-      // Otra opción sería mostrar los primeros 6 productos
-      const randomProducts = [...allProducts]
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 6);
-      
-      setFeaturedProducts(randomProducts);
-      setLoading(false);
-    }, 800); // Pequeño retraso para simular carga
-    
-    return () => clearTimeout(timer);
+    const fetchFeaturedProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get('/products');
+        const allProducts = response.data || [];
+
+        const randomProducts = [...allProducts]
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 6);
+
+        setFeaturedProducts(randomProducts);
+      } catch (error) {
+        console.error('Error al cargar productos destacados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
   }, []);
 
   // URLs de imágenes actualizadas para el carrusel
