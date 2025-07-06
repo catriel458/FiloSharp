@@ -16,6 +16,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import NotFound from './pages/NotFound';
 
+// *** AGREGAR ESTA IMPORTACIÓN ***
+import CustomKnife from './pages/CustomKnife';  // <-- ¡ESTO FALTABA!
+
 // Páginas Protegidas (Cliente)
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
@@ -24,7 +27,6 @@ import Profile from './pages/Profile';
 import Orders from './pages/Orders';
 
 // Páginas de Administrador
-
 import AdminProducts from './pages/admin/Products';
 import ProductForm from './pages/admin/ProductForm';
 
@@ -77,6 +79,10 @@ const App: React.FC = () => {
             <Route path="/knife-types" element={<KnifeTypes />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            
+            {/* *** AGREGAR ESTAS RUTAS *** */}
+            <Route path="/custom" element={<CustomKnife />} />
+            <Route path="/personalizar" element={<CustomKnife />} />
 
             {/* Rutas protegidas para clientes */}
             <Route
@@ -120,7 +126,7 @@ const App: React.FC = () => {
               }
             />
 
-            
+            {/* Rutas de administrador */}
             <Route
               path="/admin/products"
               element={

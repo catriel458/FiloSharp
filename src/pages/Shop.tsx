@@ -5,17 +5,119 @@ import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 import ProductGrid from '../components/shop/ProductGrid';
 import Filters from '../components/shop/Filters';
-import { Product } from '../types'; // Importar el tipo compartido
+import { Product } from '../types';
+
+// Componente de paginación
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (let i = Math.max(2, currentPage - delta); 
+         i <= Math.min(totalPages - 1, currentPage + delta); 
+         i++) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, '...');
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push('...', totalPages);
+    } else {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  if (totalPages <= 1) return null;
+
+  return (
+    <div className="flex items-center justify-center space-x-2 mt-12">
+      {/* Botón Anterior */}
+      <button
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all ${
+          currentPage === 1
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-white text-gray-700 hover:bg-accent hover:text-white border border-gray-300 hover:border-accent'
+        }`}
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span className="hidden sm:inline">Anterior</span>
+      </button>
+
+      {/* Números de página */}
+      <div className="flex items-center space-x-1">
+        {getVisiblePages().map((page, index) => (
+          <React.Fragment key={index}>
+            {page === '...' ? (
+              <span className="px-3 py-2 text-gray-500">...</span>
+            ) : (
+              <button
+                onClick={() => onPageChange(page as number)}
+                className={`px-3 py-2 rounded-lg font-medium transition-all ${
+                  currentPage === page
+                    ? 'bg-accent text-white shadow-lg'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                {page}
+              </button>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* Botón Siguiente */}
+      <button
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all ${
+          currentPage === totalPages
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-white text-gray-700 hover:bg-accent hover:text-white border border-gray-300 hover:border-accent'
+        }`}
+      >
+        <span className="hidden sm:inline">Siguiente</span>
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  );
+};
 
 const Shop: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [materials, setMaterials] = useState<string[]>([]);
   const [types, setTypes] = useState<string[]>([]);
+  
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage] = useState(12); // Puedes ajustar este número
   
   const selectedCategory = searchParams.get('category');
   const selectedMaterial = searchParams.get('material');
@@ -56,22 +158,33 @@ const Shop: React.FC = () => {
   useEffect(() => {
     if (allProducts.length === 0) return;
     
-    let filteredProducts = [...allProducts];
+    let filtered = [...allProducts];
     
     if (selectedCategory) {
-      filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
+      filtered = filtered.filter(p => p.category === selectedCategory);
     }
     
     if (selectedMaterial) {
-      filteredProducts = filteredProducts.filter(p => p.material === selectedMaterial);
+      filtered = filtered.filter(p => p.material === selectedMaterial);
     }
     
     if (selectedType) {
-      filteredProducts = filteredProducts.filter(p => p.type === selectedType);
+      filtered = filtered.filter(p => p.type === selectedType);
     }
     
-    setProducts(filteredProducts);
+    setFilteredProducts(filtered);
+    setCurrentPage(1); // Resetear a la primera página cuando cambien los filtros
   }, [selectedCategory, selectedMaterial, selectedType, allProducts]);
+  
+  // Calcular productos para la página actual
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * productsPerPage;
+    const endIndex = startIndex + productsPerPage;
+    setProducts(filteredProducts.slice(startIndex, endIndex));
+  }, [currentPage, filteredProducts, productsPerPage]);
+  
+  // Calcular total de páginas
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
   
   const handleCategoryChange = (category: string | null) => {
     const newParams = new URLSearchParams(searchParams);
@@ -101,6 +214,12 @@ const Shop: React.FC = () => {
       newParams.delete('type');
     }
     setSearchParams(newParams);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll suave hacia arriba cuando cambies de página
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Función para refrescar productos
@@ -169,12 +288,33 @@ const Shop: React.FC = () => {
                   <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-accent"></div>
                   <span className="ml-4 text-gray-600">Cargando productos...</span>
                 </div>
-              ) : products.length > 0 ? (
+              ) : filteredProducts.length > 0 ? (
                 <>
-                  <div className="mb-4 text-sm text-gray-600">
-                    Mostrando {products.length} de {allProducts.length} productos
+                  {/* Información de productos y paginación */}
+                  <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-sm text-gray-600 mb-2 sm:mb-0">
+                      Mostrando {((currentPage - 1) * productsPerPage) + 1} - {Math.min(currentPage * productsPerPage, filteredProducts.length)} de {filteredProducts.length} productos
+                      {allProducts.length !== filteredProducts.length && (
+                        <span className="text-accent"> (filtrado de {allProducts.length} total)</span>
+                      )}
+                    </div>
+                    
+                    {totalPages > 1 && (
+                      <div className="text-sm text-gray-600">
+                        Página {currentPage} de {totalPages}
+                      </div>
+                    )}
                   </div>
+                  
+                  {/* Grid de productos */}
                   <ProductGrid products={products} />
+                  
+                  {/* Componente de paginación */}
+                  <Pagination 
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
                 </>
               ) : allProducts.length === 0 ? (
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
