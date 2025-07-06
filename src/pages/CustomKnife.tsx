@@ -29,7 +29,9 @@ const KnifeViewer3D = ({ config }) => {
       ctx.save();
       ctx.translate(250, 200);
       ctx.rotate(rotation.y * 0.01);
-      ctx.scale(1 + Math.sin(rotation.x * 0.01) * 0.1, 1);
+      const scaleX = getLengthScaleFactor(config.blade.length);
+      const dynamicY = 1 + Math.sin(rotation.x * 0.01) * 0.05;
+      ctx.scale(scaleX, dynamicY);
 
       // Sombra
       ctx.shadowColor = 'rgba(0,0,0,0.3)';
@@ -81,12 +83,59 @@ const KnifeViewer3D = ({ config }) => {
       }
 
       // Grabado personalizado
-      if (config.engraving.text) {
-        ctx.fillStyle = '#444';
-        ctx.font = '12px serif';
-        ctx.textAlign = 'center';
+    if (config.engraving.text) {
+    ctx.fillStyle = config.engraving.color || '#444'; // usa color si está definido
+    const bladeLength = parseInt(config.blade.length.replace('cm', ''));
+    const fontSize = Math.max(10, 14 * (bladeLength / 20));
+    ctx.font = `${fontSize}px serif`;
+    ctx.textAlign = 'center';
+
+    if (config.engraving.position === 'blade') {
+        ctx.save();
+        ctx.rotate(-Math.PI / 20); // ligera inclinación estética
+
+        // Posición personalizada según tipo de cuchillo
+        let bladeCenterX = -90;
+        let bladeCenterY = 0;
+
+        switch (config.type) {
+            case 'bread':
+            bladeCenterX = -100;
+            bladeCenterY = -6;
+            break;
+            case 'chef':
+            bladeCenterX = -85;
+            bladeCenterY = -8;
+            break;
+            case 'paring':
+            bladeCenterX = -65;
+            bladeCenterY = 0;
+            break;
+            case 'butcher':
+            bladeCenterX = -90;
+            bladeCenterY = -2;
+            break;
+            case 'fillet':
+            bladeCenterX = -100;
+            bladeCenterY = -3;
+            break;
+            case 'santoku':
+            bladeCenterX = -85;
+            bladeCenterY = -6;
+            break;
+            default:
+            bladeCenterX = -90;
+            bladeCenterY = 0;
+        }
+
+        ctx.translate(bladeCenterX, bladeCenterY);
+        ctx.fillText(config.engraving.text, 0, 0);
+        ctx.restore();
+    } else if (config.engraving.position === 'handle') {
+        // Grabado en el mango
         ctx.fillText(config.engraving.text, 20, 5);
-      }
+    }
+    }
 
       // Pomo/terminación
       ctx.fillStyle = handleColors[config.handle.material];
@@ -122,6 +171,12 @@ const KnifeViewer3D = ({ config }) => {
   const handleMouseUp = () => {
     setIsDragging(false);
   };
+
+  const getLengthScaleFactor = (lengthStr) => {
+  const cm = parseInt(lengthStr.replace('cm', ''));
+  return cm / 20; // 20cm será el tamaño base (factor 1.0)
+};
+
 
   return (
     <div className="relative bg-gray-50 rounded-2xl p-8 shadow-lg">
@@ -451,6 +506,10 @@ const CustomKnifePage = () => {
               </p>
             </div>
 
+
+
+
+
             <div>
               <label className="block font-semibold mb-2">Texto del grabado</label>
               <input
@@ -463,6 +522,18 @@ const CustomKnifePage = () => {
               />
               <p className="text-sm text-gray-500 mt-1">Máximo 20 caracteres - +$75</p>
             </div>
+
+                    <select
+            value={config.engraving.color || '#000000'}
+            onChange={(e) =>
+                updateConfig('engraving', 'color', e.target.value)
+            }
+            >
+            <option value="#000000">Negro</option>
+            <option value="#ffffff">Blanco</option>
+            <option value="#ffd700">Dorado</option>
+            <option value="#888888">Gris claro</option>
+            </select>
 
             <div>
               <h4 className="font-semibold mb-4">Posición del grabado</h4>
