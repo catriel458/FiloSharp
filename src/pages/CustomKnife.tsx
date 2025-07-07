@@ -1,23 +1,69 @@
-import React, { useState, useEffect, useRef } from 'react';
+import  { useState, useEffect, useRef } from 'react';
 
-// Simulador 3D del cuchillo
-const KnifeViewer3D = ({ config }) => {
-  const canvasRef = useRef(null);
+
+// Primero definimos los tipos necesarios
+interface BladeConfig {
+  material: 'steel' | 'carbon' | 'damascus';
+  length: string;
+  finish: string;
+}
+
+interface HandleConfig {
+  material: 'wood' | 'carbon' | 'bone' | 'steel';
+  color: string;
+  grip: string;
+}
+
+interface EngravingConfig {
+  text: string;
+  position: 'blade' | 'handle';
+  font: string;
+  color?: string; // Opcional porque se agregó después
+}
+
+interface AccessoriesConfig {
+  sheath: boolean;
+  box: boolean;
+  certificate: boolean;
+}
+
+interface KnifeConfig {
+  type: 'chef' | 'santoku' | 'paring' | 'butcher' | 'bread' | 'fillet';
+  blade: BladeConfig;
+  handle: HandleConfig;
+  engraving: EngravingConfig;
+  accessories: AccessoriesConfig;
+}
+
+// Props para el componente KnifeViewer3D
+interface KnifeViewer3DProps {
+  config: KnifeConfig;
+}
+
+
+
+const KnifeViewer3D: React.FC<KnifeViewer3DProps> = ({ config }) => {
+  // Tipar correctamente el ref del canvas
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return; // Verificación de null
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return; // Verificación adicional para el contexto
+
     canvas.width = 500;
     canvas.height = 400;
 
     // Dibujar cuchillo basado en configuración
     const drawKnife = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      
       
       // Fondo con gradiente
       const bgGradient = ctx.createRadialGradient(250, 200, 0, 250, 200, 200);
@@ -149,30 +195,32 @@ const KnifeViewer3D = ({ config }) => {
     drawKnife();
   }, [config, rotation]);
 
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    setLastMousePos({ x: e.clientX, y: e.clientY });
-  };
+  
 
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - lastMousePos.x;
-    const deltaY = e.clientY - lastMousePos.y;
-    
-    setRotation(prev => ({
-      x: prev.x + deltaY,
-      y: prev.y + deltaX
-    }));
-    
-    setLastMousePos({ x: e.clientX, y: e.clientY });
-  };
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  setIsDragging(true);
+  setLastMousePos({ x: e.clientX, y: e.clientY });
+};
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  if (!isDragging) return;
+  
+  const deltaX = e.clientX - lastMousePos.x;
+  const deltaY = e.clientY - lastMousePos.y;
+  
+  setRotation(prev => ({
+    x: prev.x + deltaY,
+    y: prev.y + deltaX
+  }));
+  
+  setLastMousePos({ x: e.clientX, y: e.clientY });
+};
 
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  const getLengthScaleFactor = (lengthStr) => {
+  const getLengthScaleFactor = (lengthStr: string): number => {
   const cm = parseInt(lengthStr.replace('cm', ''));
   return cm / 20; // 20cm será el tamaño base (factor 1.0)
 };
@@ -195,7 +243,7 @@ const KnifeViewer3D = ({ config }) => {
   );
 };
 
-const drawBladeShape = (ctx, config) => {
+const drawBladeShape = (ctx: CanvasRenderingContext2D, config: KnifeConfig): void => {
   const type = config.type;
   const bladeGradient = ctx.createLinearGradient(-120, -15, -120, 15);
   bladeGradient.addColorStop(0, config.blade.material === 'damascus' ? '#2c3e50' : '#95a5a6');
@@ -290,8 +338,7 @@ const drawBladeShape = (ctx, config) => {
 };
 
 
-// Función auxiliar para ajustar brillo
-const adjustBrightness = (color, amount) => {
+const adjustBrightness = (color: string, amount: number): string => {
   const hex = color.replace('#', '');
   const num = parseInt(hex, 16);
   const r = Math.min(255, Math.max(0, (num >> 16) + amount));
@@ -301,23 +348,24 @@ const adjustBrightness = (color, amount) => {
 };
 
 const CustomKnifePage = () => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [config, setConfig] = useState({
-    type: 'chef',
+    const [currentStep, setCurrentStep] = useState(0);
+    const [config, setConfig] = useState<KnifeConfig>({
+    type: 'chef', // ✅ Ahora es tipo 'chef'
     blade: {
-      material: 'steel',
+      material: 'steel', // ✅ Ahora es tipo 'steel'
       length: '20cm',
       finish: 'satin'
     },
     handle: {
-      material: 'wood',
+      material: 'wood', // ✅ Ahora es tipo 'wood'
       color: 'walnut',
       grip: 'traditional'
     },
     engraving: {
       text: '',
-      position: 'blade',
-      font: 'script'
+      position: 'blade', // ✅ Ahora es tipo 'blade'
+      font: 'script',
+      color: '#000000'
     },
     accessories: {
       sheath: false,
@@ -338,7 +386,6 @@ const CustomKnifePage = () => {
   ];
 
   useEffect(() => {
-  // Mapear precio base según tipo
   const basePrices = {
     chef: 450,
     santoku: 480,
@@ -346,9 +393,9 @@ const CustomKnifePage = () => {
     butcher: 550,
     bread: 380,
     fillet: 420
-  };
+  } as const;
 
-  let price = basePrices[config.type] || 450;
+  let price = basePrices[config.type as keyof typeof basePrices] || 450;
 
   // Sumar extras como blade, handle, grabado, accesorios
   if (config.blade.material === 'damascus') price += 200;
@@ -363,7 +410,7 @@ const CustomKnifePage = () => {
 }, [config]);
 
 
- const updateConfig = (section, key, value) => {
+ const updateConfig = (section: string, key: string, value: any): void => {
   if (section === '') {
     setConfig(prev => ({
       ...prev,
@@ -373,7 +420,7 @@ const CustomKnifePage = () => {
     setConfig(prev => ({
       ...prev,
       [section]: {
-        ...prev[section],
+        ...(prev[section as keyof KnifeConfig] as object), // ✅ CAST A OBJECT
         [key]: value
       }
     }));
@@ -523,17 +570,22 @@ const CustomKnifePage = () => {
               <p className="text-sm text-gray-500 mt-1">Máximo 20 caracteres - +$75</p>
             </div>
 
-                    <select
-            value={config.engraving.color || '#000000'}
-            onChange={(e) =>
-                updateConfig('engraving', 'color', e.target.value)
-            }
+                                      <div>
+            <label htmlFor="engravingColor" className="block font-semibold mb-2">
+              Color del grabado
+            </label>
+            <select
+              id="engravingColor"
+              value={config.engraving.color || '#000000'}
+              onChange={(e) => updateConfig('engraving', 'color', e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
             >
-            <option value="#000000">Negro</option>
-            <option value="#ffffff">Blanco</option>
-            <option value="#ffd700">Dorado</option>
-            <option value="#888888">Gris claro</option>
+              <option value="#000000">Negro</option>
+              <option value="#ffffff">Blanco</option>
+              <option value="#ffd700">Dorado</option>
+              <option value="#888888">Gris claro</option>
             </select>
+          </div>
 
             <div>
               <h4 className="font-semibold mb-4">Posición del grabado</h4>
@@ -573,12 +625,18 @@ const CustomKnifePage = () => {
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                 >
                   <div className="flex items-center space-x-4">
-                    <input
-                      type="checkbox"
-                      checked={config.accessories[accessory.id]}
-                      onChange={(e) => updateConfig('accessories', accessory.id, e.target.checked)}
-                      className="w-5 h-5 text-accent"
-                    />
+                   <label className="flex items-center space-x-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.accessories[accessory.id as keyof AccessoriesConfig]}
+                  onChange={(e) => updateConfig('accessories', accessory.id, e.target.checked)}
+                  className="w-5 h-5 text-accent"
+                />
+                <div>
+                  <h5 className="font-semibold">{accessory.name}</h5>
+                  <p className="text-sm text-gray-600">{accessory.desc}</p>
+                </div>
+              </label>
                     <div>
                       <h5 className="font-semibold">{accessory.name}</h5>
                       <p className="text-sm text-gray-600">{accessory.desc}</p>
@@ -625,14 +683,17 @@ const CustomKnifePage = () => {
                   <h4 className="font-semibold">Accesorios incluidos</h4>
                   <ul className="space-y-2">
                     {Object.entries(config.accessories).map(([key, value]) => {
-                      if (!value) return null;
-                      const names = {
-                        sheath: 'Funda de cuero',
-                        box: 'Caja de presentación',
-                        certificate: 'Certificado de autenticidad'
-                      };
-                      return <li key={key} className="flex items-center"><span className="mr-2">✓</span>{names[key]}</li>;
-                    })}
+                  if (!value) return null;
+                  const names: Record<string, string> = {
+                    sheath: 'Funda de cuero',
+                    box: 'Caja de presentación',
+                    certificate: 'Certificado de autenticidad'
+                  };
+                  return <li key={key} className="flex items-center">
+                    <span className="mr-2">✓</span>
+                    {names[key]} {/* ✅ AHORA FUNCIONA */}
+                  </li>;
+                })}
                   </ul>
                 </div>
               </div>
