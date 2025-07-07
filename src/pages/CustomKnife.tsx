@@ -1,4 +1,7 @@
 import  { useState, useEffect, useRef } from 'react';
+import { useContext } from 'react'; // Si no la tienes ya
+import { CartContext } from '../context/CartContext'; // Ajusta la ruta según tu estructura
+import { useNavigate } from 'react-router-dom'; // Si no la tienes ya
 
 
 // Primero definimos los tipos necesarios
@@ -35,12 +38,99 @@ interface KnifeConfig {
   accessories: AccessoriesConfig;
 }
 
+
 // Props para el componente KnifeViewer3D
 interface KnifeViewer3DProps {
   config: KnifeConfig;
 }
 
+// 🔹 Modal de Éxito
+interface SuccessModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onGoToCart: () => void;
+}
 
+const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, onGoToCart }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
+        <div className="text-center">
+          {/* Icono verde de éxito */}
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            ¡Cuchillo agregado al carrito!
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            Tu cuchillo personalizado ha sido agregado correctamente.
+          </p>
+          
+          <div className="flex space-x-3">
+            <button
+              onClick={onClose}
+              className="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            >
+              Continuar personalizando
+            </button>
+            <button
+              onClick={() => { onGoToCart(); onClose(); }}
+              className="flex-1 bg-accent text-white py-3 px-4 rounded-lg hover:bg-accent/90 transition-colors font-medium"
+            >
+              Ver carrito
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 🔹 Modal de Error
+interface ErrorModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  message: string;
+}
+
+const ErrorModal: React.FC<ErrorModalProps> = ({ isOpen, onClose, message }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
+        <div className="text-center">
+          {/* Icono rojo de error */}
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            Error
+          </h3>
+          <p className="text-sm text-gray-600 mb-6">
+            {message}
+          </p>
+          
+          <button
+            onClick={onClose}
+            className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors font-medium"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const KnifeViewer3D: React.FC<KnifeViewer3DProps> = ({ config }) => {
   // Tipar correctamente el ref del canvas
@@ -347,23 +437,53 @@ const adjustBrightness = (color: string, amount: number): string => {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 };
 
-const CustomKnifePage = () => {
-    const [currentStep, setCurrentStep] = useState(0);
-    const [config, setConfig] = useState<KnifeConfig>({
-    type: 'chef', // ✅ Ahora es tipo 'chef'
+// Función para crear el resumen de personalización
+const createCustomSummary = (config: KnifeConfig): string => {
+  const parts = [
+    `Cuchillo ${config.type}`,
+    `Hoja: ${config.blade.material} ${config.blade.length}`,
+    `Mango: ${config.handle.material}`,
+  ];
+  
+  if (config.engraving.text) {
+    parts.push(`Grabado: "${config.engraving.text}"`);
+  }
+  
+  const accessories = Object.entries(config.accessories)
+    .filter(([_, value]) => value)
+    .map(([key, _]) => {
+      const names: Record<string, string> = {
+        sheath: 'Funda de cuero',
+        box: 'Caja de presentación',
+        certificate: 'Certificado'
+      };
+      return names[key];
+    });
+  
+  if (accessories.length > 0) {
+    parts.push(`Incluye: ${accessories.join(', ')}`);
+  }
+  
+  return parts.join(' | ');
+};
+
+const CustomKnifePage: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [config, setConfig] = useState<KnifeConfig>({
+    type: 'chef',
     blade: {
-      material: 'steel', // ✅ Ahora es tipo 'steel'
+      material: 'steel',
       length: '20cm',
       finish: 'satin'
     },
     handle: {
-      material: 'wood', // ✅ Ahora es tipo 'wood'
+      material: 'wood',
       color: 'walnut',
       grip: 'traditional'
     },
     engraving: {
       text: '',
-      position: 'blade', // ✅ Ahora es tipo 'blade'
+      position: 'blade',
       font: 'script',
       color: '#000000'
     },
@@ -376,6 +496,15 @@ const CustomKnifePage = () => {
 
   const [totalPrice, setTotalPrice] = useState(450);
 
+  // ✅ AGREGAR ESTAS LÍNEAS NUEVAS PARA EL CARRITO:
+  const { addItem } = useContext(CartContext);
+  const navigate = useNavigate();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const steps = [
     { title: 'Tipo de Cuchillo', icon: '🔪' },
     { title: 'Hoja', icon: '⚔️' },
@@ -386,47 +515,106 @@ const CustomKnifePage = () => {
   ];
 
   useEffect(() => {
-  const basePrices = {
-    chef: 450,
-    santoku: 480,
-    paring: 320,
-    butcher: 550,
-    bread: 380,
-    fillet: 420
-  } as const;
+    const basePrices = {
+      chef: 450,
+      santoku: 480,
+      paring: 320,
+      butcher: 550,
+      bread: 380,
+      fillet: 420
+    } as const;
 
-  let price = basePrices[config.type as keyof typeof basePrices] || 450;
+    let price = basePrices[config.type as keyof typeof basePrices] || 450;
 
-  // Sumar extras como blade, handle, grabado, accesorios
-  if (config.blade.material === 'damascus') price += 200;
-  if (config.blade.material === 'carbon') price += 100;
-  if (config.handle.material === 'carbon') price += 150;
-  if (config.handle.material === 'bone') price += 100;
-  if (config.engraving.text) price += 75;
-  if (config.accessories.sheath) price += 120;
-  if (config.accessories.box) price += 80;
+    // Sumar extras como blade, handle, grabado, accesorios
+    if (config.blade.material === 'damascus') price += 200;
+    if (config.blade.material === 'carbon') price += 100;
+    if (config.handle.material === 'carbon') price += 150;
+    if (config.handle.material === 'bone') price += 100;
+    if (config.engraving.text) price += 75;
+    if (config.accessories.sheath) price += 120;
+    if (config.accessories.box) price += 80;
 
-  setTotalPrice(price);
-}, [config]);
+    setTotalPrice(price);
+  }, [config]);
 
-
- const updateConfig = (section: string, key: string, value: any): void => {
-  if (section === '') {
-    setConfig(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  } else {
-    setConfig(prev => ({
-      ...prev,
-      [section]: {
-        ...(prev[section as keyof KnifeConfig] as object), // ✅ CAST A OBJECT
+  const updateConfig = (section: string, key: string, value: any): void => {
+    if (section === '') {
+      setConfig(prev => ({
+        ...prev,
         [key]: value
-      }
-    }));
-  }
-};
+      }));
+    } else {
+      setConfig(prev => ({
+        ...prev,
+        [section]: {
+          ...(prev[section as keyof KnifeConfig] as object),
+          [key]: value
+        }
+      }));
+    }
+  };
 
+  // ✅ FUNCIÓN PARA AGREGAR AL CARRITO:
+  const handleAddToCart = async () => {
+    setIsAddingToCart(true);
+    
+    try {
+      // Generar ID único para el producto personalizado
+      const customId = `custom-knife-${Date.now()}`;
+      
+      // Crear resumen de personalización
+      const parts = [
+        `Cuchillo ${config.type}`,
+        `Hoja: ${config.blade.material} ${config.blade.length}`,
+        `Mango: ${config.handle.material}`,
+      ];
+      
+      if (config.engraving.text) {
+        parts.push(`Grabado: "${config.engraving.text}"`);
+      }
+      
+      const accessories = Object.entries(config.accessories)
+        .filter(([_, value]) => value)
+        .map(([key, _]) => {
+          const names: Record<string, string> = {
+            sheath: 'Funda de cuero',
+            box: 'Caja de presentación',
+            certificate: 'Certificado'
+          };
+          return names[key];
+        });
+      
+      if (accessories.length > 0) {
+        parts.push(`Incluye: ${accessories.join(', ')}`);
+      }
+      
+      const customSummary = parts.join(' | ');
+      
+      // Crear el item del carrito
+      const cartItem = {
+        id: customId,
+        title: `Cuchillo ${config.type.charAt(0).toUpperCase() + config.type.slice(1)} Personalizado`,
+        price: totalPrice,
+        quantity: 1,
+        image: 'https://img.freepik.com/vector-gratis/ilustracion-icono-vector-dibujos-animados-cuchillo-flotante-concepto-icono-objeto-comida-aislado-vector-premium_138676-5784.jpg?semt=ais_hybrid&w=740', // Imagen por defecto
+        isCustom: true,
+        customSummary: customSummary
+      };
+      
+      // Agregar al carrito
+      addItem(cartItem);
+      
+      setShowSuccessModal(true);
+      
+    } catch (error) {
+      console.error('Error al agregar al carrito:', error);
+      setErrorMessage('Error al agregar al carrito. Por favor, inténtalo de nuevo.');
+      setShowErrorModal(true);
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -553,10 +741,6 @@ const CustomKnifePage = () => {
               </p>
             </div>
 
-
-
-
-
             <div>
               <label className="block font-semibold mb-2">Texto del grabado</label>
               <input
@@ -570,22 +754,22 @@ const CustomKnifePage = () => {
               <p className="text-sm text-gray-500 mt-1">Máximo 20 caracteres - +$75</p>
             </div>
 
-                                      <div>
-            <label htmlFor="engravingColor" className="block font-semibold mb-2">
-              Color del grabado
-            </label>
-            <select
-              id="engravingColor"
-              value={config.engraving.color || '#000000'}
-              onChange={(e) => updateConfig('engraving', 'color', e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
-            >
-              <option value="#000000">Negro</option>
-              <option value="#ffffff">Blanco</option>
-              <option value="#ffd700">Dorado</option>
-              <option value="#888888">Gris claro</option>
-            </select>
-          </div>
+            <div>
+              <label htmlFor="engravingColor" className="block font-semibold mb-2">
+                Color del grabado
+              </label>
+              <select
+                id="engravingColor"
+                value={config.engraving.color || '#000000'}
+                onChange={(e) => updateConfig('engraving', 'color', e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent"
+              >
+                <option value="#000000">Negro</option>
+                <option value="#ffffff">Blanco</option>
+                <option value="#ffd700">Dorado</option>
+                <option value="#888888">Gris claro</option>
+              </select>
+            </div>
 
             <div>
               <h4 className="font-semibold mb-4">Posición del grabado</h4>
@@ -620,23 +804,17 @@ const CustomKnifePage = () => {
                 { id: 'box', name: 'Caja de presentación', desc: 'Caja de madera con grabado para regalo', price: 80 },
                 { id: 'certificate', name: 'Certificado de autenticidad', desc: 'Documento que garantiza la calidad artesanal', price: 0 }
               ].map(accessory => (
-                <div
+                <label
                   key={accessory.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">
-                   <label className="flex items-center space-x-4 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.accessories[accessory.id as keyof AccessoriesConfig]}
-                  onChange={(e) => updateConfig('accessories', accessory.id, e.target.checked)}
-                  className="w-5 h-5 text-accent"
-                />
-                <div>
-                  <h5 className="font-semibold">{accessory.name}</h5>
-                  <p className="text-sm text-gray-600">{accessory.desc}</p>
-                </div>
-              </label>
+                    <input
+                      type="checkbox"
+                      checked={config.accessories[accessory.id as keyof AccessoriesConfig]}
+                      onChange={(e) => updateConfig('accessories', accessory.id, e.target.checked)}
+                      className="w-5 h-5 text-accent"
+                    />
                     <div>
                       <h5 className="font-semibold">{accessory.name}</h5>
                       <p className="text-sm text-gray-600">{accessory.desc}</p>
@@ -645,7 +823,7 @@ const CustomKnifePage = () => {
                   <div className="font-semibold text-accent">
                     {accessory.price === 0 ? 'Gratis' : `+$${accessory.price}`}
                   </div>
-                </div>
+                </label>
               ))}
             </div>
           </div>
@@ -683,17 +861,17 @@ const CustomKnifePage = () => {
                   <h4 className="font-semibold">Accesorios incluidos</h4>
                   <ul className="space-y-2">
                     {Object.entries(config.accessories).map(([key, value]) => {
-                  if (!value) return null;
-                  const names: Record<string, string> = {
-                    sheath: 'Funda de cuero',
-                    box: 'Caja de presentación',
-                    certificate: 'Certificado de autenticidad'
-                  };
-                  return <li key={key} className="flex items-center">
-                    <span className="mr-2">✓</span>
-                    {names[key]} {/* ✅ AHORA FUNCIONA */}
-                  </li>;
-                })}
+                      if (!value) return null;
+                      const names: Record<string, string> = {
+                        sheath: 'Funda de cuero',
+                        box: 'Caja de presentación',
+                        certificate: 'Certificado de autenticidad'
+                      };
+                      return <li key={key} className="flex items-center">
+                        <span className="mr-2">✓</span>
+                        {names[key]}
+                      </li>;
+                    })}
                   </ul>
                 </div>
               </div>
@@ -707,8 +885,23 @@ const CustomKnifePage = () => {
               <p className="text-sm text-gray-600 mb-6">
                 Tiempo de elaboración: 4-6 semanas | Envío gratuito incluido
               </p>
-              <button className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-4 px-6 rounded-lg transition-all transform hover:scale-105">
-                Añadir al carrito - ${totalPrice}
+              {/* ✅ BOTÓN MODIFICADO PARA AGREGAR AL CARRITO: */}
+              <button 
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-4 px-6 rounded-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAddingToCart ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Agregando al carrito...
+                  </span>
+                ) : (
+                  `Añadir al carrito - $${totalPrice}`
+                )}
               </button>
             </div>
           </div>
@@ -838,6 +1031,18 @@ const CustomKnifePage = () => {
           </div>
         </div>
       </div>
+              {/* Modales de alertas */}
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={() => setShowSuccessModal(false)}
+          onGoToCart={() => navigate('/cart')}
+        />
+
+        <ErrorModal
+          isOpen={showErrorModal}
+          onClose={() => setShowErrorModal(false)}
+          message={errorMessage}
+        />
     </div>
   );
 };

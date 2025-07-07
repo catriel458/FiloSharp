@@ -2,11 +2,13 @@ import React, { createContext, useState, useEffect } from 'react';
 
 // Interfaz para un item del carrito
 interface CartItem {
-  id: number;
+  id: number | string; // ✅ Permitir string para productos personalizados
   title: string;
   price: number;
-  image: string;
   quantity: number;
+  image: string;
+  isCustom?: boolean; // ✅ AGREGAR: Identificar si es personalizado
+  customSummary?: string; // ✅ AGREGAR: Descripción de la personalización
 }
 
 // Interfaz para el contexto del carrito
