@@ -318,6 +318,11 @@ const Header: React.FC = () => {
                   <Link to="/orders" className="block py-2 hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
                     Mis Pedidos
                   </Link>
+
+                  <Link to="/admin/products" className="block py-2 hover:text-accent transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                    Panel Admin
+                  </Link>
+
                   <button
                     type="button"
                     onClick={handleLogout}
