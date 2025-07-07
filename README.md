@@ -1,5 +1,8 @@
 # 🔥 FiloSharp - Cuchillos Artesanales Premium
 
+![imagen](https://github.com/user-attachments/assets/94bce686-54eb-4627-a123-9cc1760efbb4)
+
+
 <div align="center">
   
   **React 18.x** • **Vite** • **TailwindCSS 3.x** • **TypeScript 5.x** • **JSONBin API**
@@ -21,6 +24,17 @@
 **FiloSharp** es una plataforma e-commerce premium especializada en cuchillos artesanales de alta gama. Combina la elegancia del diseño moderno con la funcionalidad robusta de un sistema de administración completo, ofreciendo una experiencia única tanto para compradores como para administradores.
 
 > *"Cada cuchillo es una obra maestra forjada con décadas de experiencia y pasión por la perfección"*
+
+![imagen](https://github.com/user-attachments/assets/c004e36e-91f7-42bc-a7c1-cbbab4eae423)
+
+![imagen](https://github.com/user-attachments/assets/90972b6a-d6ab-4f85-b528-a869817f8954)
+
+![imagen](https://github.com/user-attachments/assets/11f08517-5d0c-4e6c-a6b7-fdaee13cdf08)
+
+![imagen](https://github.com/user-attachments/assets/22202c0f-0818-4b0f-bc6b-646d36303791)
+
+
+
 
 ### 🌟 **Demo en Vivo**
 - **🌐 Sitio Web:** [https://filo-sharp.vercel.app/](https://filo-sharp.vercel.app/)
@@ -160,6 +174,14 @@
 ### 🔍 **Sistema de Filtros Inteligente**
 - ✅ **Filtros múltiples:** Categoría, Material, Tipo
 - ✅ **Paginación** con navegación
+
+![imagen](https://github.com/user-attachments/assets/d48e1c42-6d27-4f87-bc06-3b2d44622607)
+
+
+![imagen](https://github.com/user-attachments/assets/cf67ba69-ced0-4d06-89a5-1886ee004f4d)
+
+![imagen](https://github.com/user-attachments/assets/d89fc343-5c94-49fb-aa40-260a54243ecd)
+
 
 ---
 
