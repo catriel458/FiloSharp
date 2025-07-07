@@ -4,6 +4,7 @@ import api from '../services/api';
 import { CartContext } from '../context/CartContext';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import SEO from '../components/SEO';
 
 // Definimos el tipo del producto
 interface Product {
@@ -84,37 +85,76 @@ const ProductDetail = () => {
       }, 3000);
     }
   };
+
+  // Función para generar SEO dinámico basado en el producto
+  const generateSEOContent = (product: Product) => {
+    const title = `${product.title} - ${product.category} | FiloSharp Cuchillos Artesanales`;
+    
+    const description = `${product.description} Material: ${product.material}. Precio: $${product.price.toLocaleString()}. Cuchillos artesanales de alta calidad con garantía FiloSharp.`;
+    
+    const keywords = `${product.title}, ${product.category}, ${product.material}, ${product.type}, cuchillos artesanales, FiloSharp, cuchillos forjados, acero damasco, cuchillos chef, cuchillería premium, comprar ${product.title}`;
+    
+    return { title, description, keywords };
+  };
   
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center bg-gray-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-600"></div>
-      </div>
+      <>
+        {/* ✅ SEO COMPONENT - Loading state */}
+        <SEO 
+          title="Cargando producto... | FiloSharp Cuchillos Artesanales"
+          description="Cargando información del producto. FiloSharp - Cuchillos artesanales de alta calidad forjados a mano."
+          keywords="cuchillos artesanales, FiloSharp, cargando producto, cuchillos forjados"
+        />
+        
+        <div className="min-h-screen flex justify-center items-center bg-gray-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-600"></div>
+        </div>
+      </>
     );
   }
   
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <svg className="mx-auto h-16 w-16 text-red-500 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <h2 className="text-2xl font-bold mb-4">Producto no encontrado</h2>
-          <p className="text-gray-600 mb-8">El producto que estás buscando no existe o ha sido eliminado.</p>
-          <Link 
-            to="/shop" 
-            className="inline-block bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200"
-          >
-            Volver a la tienda
-          </Link>
+      <>
+        {/* ✅ SEO COMPONENT - Product not found */}
+        <SEO 
+          title="Producto no encontrado | FiloSharp Cuchillos Artesanales"
+          description="El producto que buscas no está disponible. Explora nuestra colección de cuchillos artesanales FiloSharp forjados a mano."
+          keywords="producto no encontrado, cuchillos artesanales, FiloSharp, cuchillos forjados, tienda cuchillos"
+        />
+        
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+            <svg className="mx-auto h-16 w-16 text-red-500 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 className="text-2xl font-bold mb-4">Producto no encontrado</h2>
+            <p className="text-gray-600 mb-8">El producto que estás buscando no existe o ha sido eliminado.</p>
+            <Link 
+              to="/shop" 
+              className="inline-block bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200"
+            >
+              Volver a la tienda
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
+
+  // Generar contenido SEO dinámico
+  const seoContent = generateSEOContent(product);
   
   return (
     <div className="flex flex-col min-h-screen">
+      {/* ✅ SEO COMPONENT - Dynamic product SEO */}
+      <SEO 
+        title={seoContent.title}
+        description={seoContent.description}
+        keywords={seoContent.keywords}
+      />
+      
       <Header />
       
       <div className="bg-gray-50">

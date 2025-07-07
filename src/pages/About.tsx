@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import SEO from '../components/SEO';
 
 interface VisibilityState {
   history?: boolean;
@@ -95,6 +96,13 @@ const About: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* ✅ SEO COMPONENT - About page */}
+      <SEO 
+        title="Nuestra Historia - FiloSharp | 45 Años Forjando Tradición y Excelencia"
+        description="Descubre la historia de FiloSharp desde 1978. Conoce a nuestros maestros artesanos, nuestros valores y el taller donde nacen cuchillos únicos. 45 años de tradición, artesanía y excelencia en La Plata, Buenos Aires."
+        keywords="historia FiloSharp, maestros artesanos, taller cuchillos La Plata, tradición cuchillería, Antonio Mendoza fundador, Diego Ramírez forjador, María González mangos, Javier Mendoza afilado, acero damasco, técnica honbazuke, maderas exóticas, 45 años experiencia"
+      />
+      
       <Header />
 
       <main className="flex-grow">
@@ -173,7 +181,7 @@ const About: React.FC = () => {
                     </div>
                     <div className="rounded-xl overflow-hidden shadow-lg">
                       <img
-                        src="https://cdn-ilahfkn.nitrocdn.com/YHEQKOprmqfhDiCZIBAzbCbpumRPMhkw/assets/images/optimized/rev-712d9d3/nobliecustomknives.com/wp-content/uploads/2024/09/10-easy-steps-to-Master-Japanese-Knife-Care.jpg"
+                        src="https://cdn-ilahfkn.nitrocdn.com/YHEQKOprmqfhDiCZIBAzbCbpumRPMhkw/assets/images/optimized/rev-451383b/nobliecustomknives.com/wp-content/uploads/2024/09/10-easy-steps-to-Master-Japanese-Knife-Care.jpg"
                         alt="Afilado tradicional"
                         className="w-full h-auto"
                       />

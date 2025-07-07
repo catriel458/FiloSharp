@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import SEO from '../components/SEO';
 import ProductGrid from '../components/shop/ProductGrid';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -33,6 +34,7 @@ const Carousel = ({ images }: { images: string[] }) => {
   };
 
   return (
+   
     <div className="relative w-full h-screen overflow-hidden">
       {images.map((image, index) => (
         <div
@@ -164,6 +166,14 @@ const Home: React.FC = () => {
   ];
 
   return (
+
+     <>
+      {/* ✅ SEO COMPONENT */}
+      <SEO
+        title="FiloSharp - Cuchillos Artesanales de Alta Calidad"
+        description="Descubre la excelencia en cuchillería artesanal. Cuchillos únicos forjados a mano por maestros artesanos con más de 30 años de experiencia. Materiales premium, garantía de por vida."
+        keywords="cuchillos artesanales, cuchillos forjados, acero damasco, cuchillos chef, cuchillería premium, FiloSharp, cuchillos a mano, garantía de por vida"
+      />
     <div className="flex flex-col min-h-screen bg-secondary/5">
       <Header />
 
@@ -436,6 +446,7 @@ const Home: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

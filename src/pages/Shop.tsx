@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import SEO from '../components/SEO';
 import api from '../services/api';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
@@ -234,6 +235,12 @@ const Shop: React.FC = () => {
   };
   
   return (
+   <>
+    <SEO
+      title="Tienda de Cuchillos Artesanales | FiloSharp"
+      description="Explora nuestra colección completa de cuchillos artesanales. Cuchillos de chef, santoku, mondadores y más."
+      keywords="tienda cuchillos, comprar cuchillos, cuchillos chef, cuchillería artesanal"
+    />  
     <div className="flex flex-col min-h-screen">
       <Header />
       
@@ -360,6 +367,7 @@ const Shop: React.FC = () => {
       
       <Footer />
     </div>
+    </>
   );
 };
 

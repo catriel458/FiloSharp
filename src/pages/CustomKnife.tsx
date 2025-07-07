@@ -2,6 +2,7 @@ import  { useState, useEffect, useRef } from 'react';
 import { useContext } from 'react'; // Si no la tienes ya
 import { CartContext } from '../context/CartContext'; // Ajusta la ruta según tu estructura
 import { useNavigate } from 'react-router-dom'; // Si no la tienes ya
+import SEO from '../components/SEO';
 
 
 // Primero definimos los tipos necesarios
@@ -913,6 +914,15 @@ const CustomKnifePage: React.FC = () => {
   };
 
   return (
+
+    <>
+      {/* ✅ SEO COMPONENT */}
+      <SEO
+        title="Personalizar Cuchillo - Diseña tu Cuchillo Único | FiloSharp"
+        description="Crea tu cuchillo personalizado paso a paso. Elige tipo, material de hoja, mango, grabado y accesorios. Forjado artesanalmente para ti."
+        keywords="cuchillo personalizado, diseñar cuchillo, cuchillo a medida, grabado personalizado, acero damasco, cuchillo artesanal"
+      />
+
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm">
@@ -1044,6 +1054,7 @@ const CustomKnifePage: React.FC = () => {
           message={errorMessage}
         />
     </div>
+    </>
   );
 };
 

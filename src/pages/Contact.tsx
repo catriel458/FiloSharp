@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
+import SEO from '../components/SEO';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -106,6 +107,13 @@ const Contact: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* ✅ SEO COMPONENT - Contact page */}
+      <SEO 
+        title="Contacto - FiloSharp Cuchillos Artesanales | Atención Personalizada"
+        description="Contáctanos para consultas sobre cuchillos artesanales, pedidos personalizados y visitas al taller. Ubicados en La Plata, Buenos Aires. Tel: +54 (221) 123-4567. Atención de Lun-Vie 9-18hs, Sáb 10-14hs."
+        keywords="contacto FiloSharp, cuchillos artesanales La Plata, taller cuchillos Buenos Aires, pedidos personalizados, visitas taller, atención al cliente, info@cuchillosartesanales.com, teléfono cuchillos artesanales, horarios atención"
+      />
+      
       <Header />
 
       <main className="flex-grow">
