@@ -144,7 +144,7 @@ const Header: React.FC = () => {
                                 </Link>
                                 <button
                                   type="button"
-                                  onClick={() => removeItem(item.id)}
+                                  onClick={() => removeItem(Number(item.id))}
                                   className="text-xs text-red-500 hover:text-red-700 ml-2"
                                   aria-label={`Eliminar ${item.title} del carrito`}
                                 >

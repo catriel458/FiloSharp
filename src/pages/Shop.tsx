@@ -47,32 +47,47 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
   if (totalPages <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center space-x-2 mt-12">
+    <nav 
+      className="flex items-center justify-center space-x-2 mt-12"
+      role="navigation"
+      aria-label="Navegación de páginas de productos"
+    >
       {/* Botón Anterior */}
       <button
+        type="button"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label={`Ir a la página anterior (página ${currentPage - 1})`}
         className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all ${
           currentPage === 1
             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
             : 'bg-white text-gray-700 hover:bg-accent hover:text-white border border-gray-300 hover:border-accent'
         }`}
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg 
+          className="w-4 h-4" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+          aria-hidden="true"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
         <span className="hidden sm:inline">Anterior</span>
       </button>
 
       {/* Números de página */}
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center space-x-1" role="group" aria-label="Páginas disponibles">
         {getVisiblePages().map((page, index) => (
           <React.Fragment key={index}>
             {page === '...' ? (
-              <span className="px-3 py-2 text-gray-500">...</span>
+              <span className="px-3 py-2 text-gray-500" aria-hidden="true">...</span>
             ) : (
               <button
+                type="button"
                 onClick={() => onPageChange(page as number)}
+                aria-label={`Ir a la página ${page}`}
+                aria-current={currentPage === page ? "page" : undefined}
                 className={`px-3 py-2 rounded-lg font-medium transition-all ${
                   currentPage === page
                     ? 'bg-accent text-white shadow-lg'
@@ -88,8 +103,10 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
 
       {/* Botón Siguiente */}
       <button
+        type="button"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label={`Ir a la página siguiente (página ${currentPage + 1})`}
         className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-all ${
           currentPage === totalPages
             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -97,11 +114,17 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
         }`}
       >
         <span className="hidden sm:inline">Siguiente</span>
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg 
+          className="w-4 h-4" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+          aria-hidden="true"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
       </button>
-    </div>
+    </nav>
   );
 };
 
@@ -235,138 +258,182 @@ const Shop: React.FC = () => {
   };
   
   return (
-   <>
-    <SEO
-      title="Tienda de Cuchillos Artesanales | FiloSharp"
-      description="Explora nuestra colección completa de cuchillos artesanales. Cuchillos de chef, santoku, mondadores y más."
-      keywords="tienda cuchillos, comprar cuchillos, cuchillos chef, cuchillería artesanal"
-    />  
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      
-      <main className="flex-grow py-8">
-        <div className="container-custom">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Tienda</h1>
-            
-            {/* Botón para refrescar productos (opcional, para desarrollo) */}
-            <button
-              onClick={refreshProducts}
-              className="text-sm text-gray-600 hover:text-gray-800 underline"
-              disabled={loading}
-            >
-              🔄 Actualizar productos
-            </button>
-          </div>
-
-          {/* Mostrar mensaje de error si existe */}
-          {error && (
-            <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              <p>{error}</p>
-              <button 
+    <>
+      <SEO
+        title="Tienda de Cuchillos Artesanales | FiloSharp"
+        description="Explora nuestra colección completa de cuchillos artesanales. Cuchillos de chef, santoku, mondadores y más."
+        keywords="tienda cuchillos, comprar cuchillos, cuchillos chef, cuchillería artesanal"
+      />  
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        
+        <main className="flex-grow py-8" role="main">
+          <div className="container-custom">
+            <header className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold">Tienda</h1>
+              
+              {/* Botón para refrescar productos (opcional, para desarrollo) */}
+              <button
+                type="button"
                 onClick={refreshProducts}
-                className="mt-2 text-sm underline hover:no-underline"
+                className="text-sm text-gray-600 hover:text-gray-800 underline"
+                disabled={loading}
+                aria-label="Actualizar lista de productos"
               >
-                Intentar nuevamente
+                🔄 Actualizar productos
               </button>
-            </div>
-          )}
-          
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Filtros */}
-            <div className="lg:col-span-1">
-              <Filters
-                categories={categories}
-                materials={materials}
-                types={types}
-                selectedCategory={selectedCategory}
-                selectedMaterial={selectedMaterial}
-                selectedType={selectedType}
-                onCategoryChange={handleCategoryChange}
-                onMaterialChange={handleMaterialChange}
-                onTypeChange={handleTypeChange}
-              />
-            </div>
+            </header>
+
+            {/* Mostrar mensaje de error si existe */}
+            {error && (
+              <div 
+                className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded"
+                role="alert"
+                aria-live="polite"
+              >
+                <p>{error}</p>
+                <button 
+                  type="button"
+                  onClick={refreshProducts}
+                  className="mt-2 text-sm underline hover:no-underline"
+                  aria-label="Intentar cargar productos nuevamente"
+                >
+                  Intentar nuevamente
+                </button>
+              </div>
+            )}
             
-            {/* Productos */}
-            <div className="lg:col-span-3">
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-accent"></div>
-                  <span className="ml-4 text-gray-600">Cargando productos...</span>
-                </div>
-              ) : filteredProducts.length > 0 ? (
-                <>
-                  {/* Información de productos y paginación */}
-                  <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div className="text-sm text-gray-600 mb-2 sm:mb-0">
-                      Mostrando {((currentPage - 1) * productsPerPage) + 1} - {Math.min(currentPage * productsPerPage, filteredProducts.length)} de {filteredProducts.length} productos
-                      {allProducts.length !== filteredProducts.length && (
-                        <span className="text-accent"> (filtrado de {allProducts.length} total)</span>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+              {/* Filtros */}
+              <aside className="lg:col-span-1" aria-label="Filtros de productos">
+                <Filters
+                  categories={categories}
+                  materials={materials}
+                  types={types}
+                  selectedCategory={selectedCategory}
+                  selectedMaterial={selectedMaterial}
+                  selectedType={selectedType}
+                  onCategoryChange={handleCategoryChange}
+                  onMaterialChange={handleMaterialChange}
+                  onTypeChange={handleTypeChange}
+                />
+              </aside>
+              
+              {/* Productos */}
+              <section 
+                className="lg:col-span-3"
+                aria-label="Lista de productos"
+                aria-live="polite"
+                
+              >
+                {loading ? (
+                  <div 
+                    className="flex justify-center items-center h-64"
+                    role="status"
+                    aria-label="Cargando productos"
+                  >
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-accent" aria-hidden="true"></div>
+                    <span className="ml-4 text-gray-600">Cargando productos...</span>
+                    <span className="sr-only">Cargando productos de la tienda...</span>
+                  </div>
+                ) : filteredProducts.length > 0 ? (
+                  <>
+                    {/* Información de productos y paginación */}
+                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                      <div 
+                        className="text-sm text-gray-600 mb-2 sm:mb-0"
+                        role="status"
+                        aria-live="polite"
+                      >
+                        Mostrando {((currentPage - 1) * productsPerPage) + 1} - {Math.min(currentPage * productsPerPage, filteredProducts.length)} de {filteredProducts.length} productos
+                        {allProducts.length !== filteredProducts.length && (
+                          <span className="text-accent"> (filtrado de {allProducts.length} total)</span>
+                        )}
+                      </div>
+                      
+                      {totalPages > 1 && (
+                        <div className="text-sm text-gray-600" aria-label={`Página actual ${currentPage} de ${totalPages}`}>
+                          Página {currentPage} de {totalPages}
+                        </div>
                       )}
                     </div>
                     
-                    {totalPages > 1 && (
-                      <div className="text-sm text-gray-600">
-                        Página {currentPage} de {totalPages}
+                    {/* Grid de productos */}
+                    <div role="region" aria-label={`Productos página ${currentPage}`}>
+                      <ProductGrid products={products} />
+                    </div>
+                    
+                    {/* Componente de paginación */}
+                    <Pagination 
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  </>
+                ) : allProducts.length === 0 ? (
+                  <div 
+                    className="bg-blue-50 border-l-4 border-blue-400 p-4"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg 
+                          className="h-5 w-5 text-blue-400" 
+                          viewBox="0 0 20 20" 
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
                       </div>
-                    )}
-                  </div>
-                  
-                  {/* Grid de productos */}
-                  <ProductGrid products={products} />
-                  
-                  {/* Componente de paginación */}
-                  <Pagination 
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                  />
-                </>
-              ) : allProducts.length === 0 ? (
-                <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-blue-700">
-                        No hay productos disponibles en este momento.
-                      </p>
+                      <div className="ml-3">
+                        <p className="text-sm text-blue-700">
+                          No hay productos disponibles en este momento.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-700">
-                        No se encontraron productos con los filtros seleccionados.
-                      </p>
-                      <button
-                        onClick={() => setSearchParams(new URLSearchParams())}
-                        className="mt-2 text-sm underline hover:no-underline"
-                      >
-                        Limpiar filtros
-                      </button>
+                ) : (
+                  <div 
+                    className="bg-yellow-50 border-l-4 border-yellow-400 p-4"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <svg 
+                          className="h-5 w-5 text-yellow-400" 
+                          viewBox="0 0 20 20" 
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-yellow-700">
+                          No se encontraron productos con los filtros seleccionados.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setSearchParams(new URLSearchParams())}
+                          className="mt-2 text-sm underline hover:no-underline"
+                          aria-label="Limpiar todos los filtros aplicados"
+                        >
+                          Limpiar filtros
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </section>
             </div>
           </div>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
+        </main>
+        
+        <Footer />
+      </div>
     </>
   );
 };

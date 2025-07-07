@@ -86,7 +86,7 @@ const Cart: React.FC = () => {
                           <div className="flex items-center">
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(Number(item.id), item.quantity - 1)}
                               className="text-gray-500 focus:outline-none focus:text-accent"
                               aria-label="Decrementar cantidad"
                             >
@@ -97,7 +97,7 @@ const Cart: React.FC = () => {
                             <span className="mx-2 text-gray-700">{item.quantity}</span>
                             <button
                               type="button"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(Number(item.id), item.quantity + 1)}
                               className="text-gray-500 focus:outline-none focus:text-accent"
                               aria-label="Incrementar cantidad"
                             >
@@ -110,7 +110,7 @@ const Cart: React.FC = () => {
                           {/* Botón eliminar */}
                           <button
                             type="button"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(Number(item.id))}
                             className="text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
                           >
                             Eliminar

@@ -438,35 +438,7 @@ const adjustBrightness = (color: string, amount: number): string => {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 };
 
-// Función para crear el resumen de personalización
-const createCustomSummary = (config: KnifeConfig): string => {
-  const parts = [
-    `Cuchillo ${config.type}`,
-    `Hoja: ${config.blade.material} ${config.blade.length}`,
-    `Mango: ${config.handle.material}`,
-  ];
-  
-  if (config.engraving.text) {
-    parts.push(`Grabado: "${config.engraving.text}"`);
-  }
-  
-  const accessories = Object.entries(config.accessories)
-    .filter(([_, value]) => value)
-    .map(([key, _]) => {
-      const names: Record<string, string> = {
-        sheath: 'Funda de cuero',
-        box: 'Caja de presentación',
-        certificate: 'Certificado'
-      };
-      return names[key];
-    });
-  
-  if (accessories.length > 0) {
-    parts.push(`Incluye: ${accessories.join(', ')}`);
-  }
-  
-  return parts.join(' | ');
-};
+
 
 const CustomKnifePage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(0);
